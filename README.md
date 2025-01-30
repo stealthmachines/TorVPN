@@ -1,3 +1,4 @@
+✅ Specifically designed for Proxmox with stand-alone in mind
 ✅ Fully Automated Installation
 ✅ Tor Hidden Service for Proxmox
 ✅ NGINX Reverse Proxy with Authentication
