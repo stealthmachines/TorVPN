@@ -7,19 +7,11 @@ if [ "$EUID" -ne 0 ]
 fi
 
 # Update system and install necessary packages
-apt update && apt install -y \
-    tor nginx apache2-utils nodejs npm curl gnupg lsb-release ca-certificates \
-    software-properties-common
-
-# Add NodeSource for Node.js and npm for Debian 12 (Bookworm)
-curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -
-
-# Install Node.js and npm again to ensure correct version from NodeSource
-apt update && apt install -y nodejs
+apt update && apt install -y tor nginx apache2-utils nodejs npm pve-manager pve-cluster qemu-server proxmox-ve postfix open-iscsi
 
 # Configuration parameters for LXC
 VMID=100
-OSTEMPLATE="local:vztmpl/debian-12-standard_12.0-1_amd64.tar.gz"  # Adjust based on available templates
+OSTEMPLATE="local:vztmpl/ubuntu-20.04-standard_20.04-1_amd64.tar.gz"  # Adjust based on available templates
 STORAGE="local"
 HOSTNAME="mylxc"
 MEMORY=1024
@@ -82,7 +74,7 @@ io.on('connection', (socket) => {
                     connectedSocket: socket.id
                 };
 
-                peers[socket.id] = username;
+                peers[socket.id] = username; // Assuming username is unique for room ID
 
                 callback({ qr: qrUrl });
             });
@@ -105,6 +97,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('webrtc-signal', (data) => {
+        // Since we're not using rooms, just broadcast to all connected clients
         socket.broadcast.emit('webrtc-signal', { from: socket.id, signal: data.signal });
     });
 
@@ -155,6 +148,12 @@ systemctl enable webrtc-tor.service && systemctl start webrtc-tor.service
 
 # Auto-start on Proxmox Boot
 pct set $VMID -onboot 1
+
+# Output Final Instructions
+echo "✅ Setup Complete! Access Proxmox via: http://$ONION_ADDR (Tor required)"
+echo "✅ WebRTC over Tor Server with 2FA running on port 8080"
+echo "✅ LXC Container with ID $VMID created, started, and configured to auto-start"
+echo "Note: Clients need to scan the QR code for setup and connection."
 
 # Host the WebRTC client page
 mkdir -p /var/www/html/webrtc
@@ -288,7 +287,4 @@ EOF
 ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
 systemctl restart nginx
 
-echo "✅ Setup Complete! Access Proxmox via: http://$ONION_ADDR (Tor required)"
-echo "✅ WebRTC over Tor Server with 2FA running on port 8080"
-echo "✅ LXC Container with ID $VMID created, started, and configured to auto-start"
-echo "✅ WebRTC client page hosted at /webrtc/"
+echo "WebRTC client page hosted at /webrtc/"
