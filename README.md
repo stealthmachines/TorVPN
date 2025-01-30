@@ -16,7 +16,7 @@ Run the Script in the LXC Container
 
 ```
 apt update && apt install -y curl
-curl -fsSL https://raw.githubusercontent.com/your-repo/proxmox-vpn-setup.sh | bash
+curl -fsSL https://github.com/stealthmachines/TorVPN/blob/main/proxmox-vpn-setup.sh | bash
 ```
 
 Access Proxmox Securely
